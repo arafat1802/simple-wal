@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package wal;
+
+option go_package = "walpb"; // Adjust the package path for your project
+
+message LogEntry {
+  int64 timestamp = 1;
+  string operation = 2; // e.g., "PUT", "DELETE"
+  string key = 3;
+  bytes value = 4;
+}
