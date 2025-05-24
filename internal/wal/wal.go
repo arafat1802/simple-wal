@@ -1,5 +1,5 @@
 package wal
 
-func Add(a int, b int) {
+func Add(a int, b int) int {
 	return a + b
 }
