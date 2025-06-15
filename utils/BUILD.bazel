@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "utils",
+    srcs = ["helper.go"],
+    importpath = "simple-wal/utils",
+    visibility = ["//visibility:public"],
+)
