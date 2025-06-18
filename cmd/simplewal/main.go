@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"simple-wal/internal/wal"
-	// "google.golang.org/protobuf/proto"
 )
 
 func usage() {
