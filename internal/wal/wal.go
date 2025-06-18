@@ -1,5 +1,17 @@
 package wal
 
-func Add(a int, b int) int {
-	return a + b
+
+
+func serialize() {
+	// TODO: implement
+
+}
+func Writes () {
+	// TODO: implement
+
+}
+
+func Recover() {
+	// TODO: implement
+
 }
