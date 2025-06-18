@@ -1,5 +1,8 @@
 package wal
 
+func InitWAL(cfg WALConfig) (*WAL, error) {
+
+}
 
 
 func serialize() {
