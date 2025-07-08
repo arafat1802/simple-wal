@@ -43,7 +43,14 @@ func InitWAL(cfg WALConfig) (*WAL, error) {
 	// 	lastSegmentID = 0
 	// }
 	
-	segmentID, err := CreateSegmentFile(cfg.Directory, 0)
+	segmentID, err := CreateSegmentFile(cfg.Directory)
+	
+	if err != nil {
+		return nil, fmt.Errorf("wal: failed to create segment file: %w", err)
+	}
+
+	
+
 	
 
 }
@@ -52,12 +59,15 @@ func serialize() {
 	// TODO: implement
 
 }
-func Writes() {
+func WriteEntryWithCheckpoint() {
+	// TODO: implement
+}
+func WriteEntry() {
 	// TODO: implement
 
 }
 
-func Recover() {
+func ReadAllEntries() {
 	// TODO: implement
 
 }
