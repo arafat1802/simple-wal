@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package wal;
+package proto;
 
-option go_package = "walpb"; // Adjust the package path for your project
+option go_package = "simple-wal/proto";
 
-message LogEntry {
-  int64 timestamp = 1;
-  string operation = 2; // e.g., "PUT", "DELETE"
-  string key = 3;
-  bytes value = 4;
+message WalEntry {
+  uint64 logSeqNumber = 1;
+  bytes data = 2;
+  uint32 CRC = 3;
+  optional bool isCheckPoint = 4;
 }
