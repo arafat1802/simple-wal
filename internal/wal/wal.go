@@ -1,58 +1,48 @@
 package wal
 
 import (
-	"fmt"
+	"bufio"
+	"context"
 	"os"
-	"path/filepath"
+	"time"
 )
 
-func InitWAL(cfg WALConfig) (*WAL, error) {
-	if cfg.Directory == "" {
-		return nil, fmt.Errorf("wal: directory must be specified")
-	}
-	if cfg.FileSize == 0 {
-		return nil, fmt.Errorf("wal: file size must be specified")
-	}
-	if cfg.MaxFiles == 0 {
-		return nil, fmt.Errorf("wal: max files must be specified")
-	}
+// type WalConfig struct {
+// 	Directory string
+// 	EnableFsync int
+// 	MaxFileSize uint64
+// 	MaxSegments int
+// 	SyncInterval time.Duration
+// }
 
-	if err := os.MkdirAll(cfg.Directory, 0755); err != nil {
-		return nil, fmt.Errorf("wal: failed to create directory: %w", err)
-	}
+type WriteAheadLog struct {
+	directory string
+	currFile  *os.File
+	bufWriter *bufio.Writer
+	syncTimer *time.Timer
+	context   context.Context
+}
 
-	// don't need this becaule we are working on single file rather than segmentation
-	
+func InitWAL(cfg WalConfig) (*WriteAheadLog, error) {
 
-	// files, err := filepath.Glob(filepath.Join(cfg.Directory, "*.wal"))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("wal: failed to list files: %w", err)
-	// }
+	os.MkdirAll(cfg.Directory, 0755)
 
-	// if len(files) > 0 {
-	// 	lastSegmentID, err = FindLastSegmentIndexFiles(files)
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("wal: failed to find last segment index: %w", err)
-	// 	}
-	// } else {
-	// 	// create the first log segment
-	// 	file, err := CreateSegmentFile(directory, 0)
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("wal: failed to create first segment file: %w", err)
-	// 	}
-	// 	lastSegmentID = 0
-	// }
-	
-	segmentID, err := CreateSegmentFile(cfg.Directory)
-	
+	file, err := os.Create(cfg.Directory + "/wal.log")
 	if err != nil {
-		return nil, fmt.Errorf("wal: failed to create segment file: %w", err)
+		panic(err)
 	}
 
-	
+	walog := WriteAheadLog{
+		directory: cfg.Directory,
+		currFile:  file,
+		bufWriter: bufio.NewWriter(file),
+		syncTimer: time.NewTimer(cfg.SyncInterval),
+		context:   context.Background(),
+	}
 
-	
+	go walog.syncPeriodically()
 
+	return &walog, nil
 }
 
 func serialize() {
@@ -62,12 +52,41 @@ func serialize() {
 func WriteEntryWithCheckpoint() {
 	// TODO: implement
 }
-func WriteEntry() {
+func (walog *WriteAheadLog) WriteEntry(data []byte) error {
 	// TODO: implement
+	// file, err := os.OpenFile(walog.directory+"/wal.log", os.O_APPEND, 0755)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
+	// file.Write([]byte("hello world"))
+	// file.Close()
+
+	walog.bufWriter.Write(data)
+
+	return nil
 }
+
+func (walog *WriteAheadLog) FlushAndClose() {
+	walog.bufWriter.Flush()
+	walog.currFile.Close()
+}
+
+// TODO: implement
 
 func ReadAllEntries() {
 	// TODO: implement
 
+}
+
+func (walog *WriteAheadLog) syncPeriodically() {
+	for {
+		select {
+		case <-walog.syncTimer.C:
+			walog.FlushAndClose()
+
+		case <-walog.context.Done():
+			return
+		}
+	}
 }

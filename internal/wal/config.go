@@ -3,21 +3,19 @@ package wal
 import "time"
 
 type WalConfig struct {
-	WalPath string
-	WalMaxNum int
-	WalMaxAge time.Duration
-	ShouldFsync bool
-	WalSize int64
-	WalSegments int
+	Directory    string
+	EnableFsync  bool
+	MaxFileSize  uint64
+	MaxSegments  int
+	SyncInterval time.Duration
 }
 
 func CreateDefaultWalConfig(directory string) WalConfig {
 	return WalConfig{
-		WalPath: directory,
-		WalSize: 16 * 1024 * 1024,
-		WalMaxNum: 100,
-		WalMaxAge: 24 * time.Hour,
-		ShouldFsync: true,
-		WalSegments: 1,
+		Directory:    directory,
+		MaxFileSize:  16 * 1024 * 1024,
+		EnableFsync:  true,
+		MaxSegments:  1,
+		SyncInterval: 300 * time.Millisecond,
 	}
 }
