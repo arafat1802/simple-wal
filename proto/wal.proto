@@ -1,12 +1,13 @@
 syntax = "proto3";
 
-package proto;
+package protobuf;
 
-option go_package = "simple-wal/proto";
+option go_package = "simple-wal/protobuf";
 
 message WalEntry {
-  uint64 logSeqNumber = 1;
-  bytes data = 2;
-  uint32 CRC = 3;
-  optional bool isCheckPoint = 4;
+  //uint64 logSeqNumber = 1;
+ // bytes data = 2;
+  //uint32 CRC = 3;
+ // optional bool isCheckPoint = 4;
+  string message = 1;
 }
