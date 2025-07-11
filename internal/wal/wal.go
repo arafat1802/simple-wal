@@ -3,8 +3,13 @@ package wal
 import (
 	"bufio"
 	"context"
+	"io/ioutil"
 	"os"
+	"simple-wal/bazel-bin/proto/protobuf_go_proto_/simple-wal/protobuf"
+	"simple-wal/protobuf"
 	"time"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // type WalConfig struct {
@@ -22,6 +27,7 @@ type WriteAheadLog struct {
 	syncTimer *time.Timer
 	context   context.Context
 }
+
 
 func InitWAL(cfg WalConfig) (*WriteAheadLog, error) {
 
@@ -52,19 +58,12 @@ func serialize() {
 func WriteEntryWithCheckpoint() {
 	// TODO: implement
 }
-func (walog *WriteAheadLog) WriteEntry(data []byte) error {
-	// TODO: implement
-	// file, err := os.OpenFile(walog.directory+"/wal.log", os.O_APPEND, 0755)
-	// if err != nil {
-	// 	panic(err)
-	// }
+func (walog *WriteAheadLog) WriteEntry(entry *protobuf.WalEntry) error {
 
-	// file.Write([]byte("hello world"))
-	// file.Close()
-
+	data, err := proto.Marshal(entry)
 	walog.bufWriter.Write(data)
 
-	return nil
+	return err
 }
 
 func (walog *WriteAheadLog) FlushAndClose() {
@@ -74,9 +73,8 @@ func (walog *WriteAheadLog) FlushAndClose() {
 
 // TODO: implement
 
-func ReadAllEntries() {
-	// TODO: implement
-
+func (walog *WriteAheadLog) ReadAllEntries(filename string) (*protobuf.WalEntry, error) {
+	
 }
 
 func (walog *WriteAheadLog) syncPeriodically() {

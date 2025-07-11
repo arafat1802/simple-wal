@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"simple-wal/internal/wal"
+	"simple-wal/protobuf"
 	"time"
 )
 
@@ -32,11 +33,18 @@ func main() {
 		fmt.Printf("failed to init wal: %v\n", err)
 		return
 	}
-
-	walog.WriteEntry([]byte("Hello World\n"))
-	walog.WriteEntry([]byte("Hello Arafat\n"))
+	entry1 := &protobuf.WalEntry{
+		Message: "Hello WAL",
+	}
+	entry2 := &protobuf.WalEntry{
+		Message: "Hello WAL",
+	}
+	walog.WriteEntry(entry1)
+	walog.WriteEntry(entry2)
 	//walog.FlushAndClose()
 
 	time.Sleep(400 * time.Millisecond)
+
+	walog.ReadAllEntries("/home/arafat/wal.log")
 
 }

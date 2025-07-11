@@ -8,4 +8,8 @@ go_library(
     ],
     importpath = "simple-wal/internal/wal",
     visibility = ["//:__subpackages__"],
+    deps = [
+        "//proto:protobuf",
+        "@org_golang_google_protobuf//proto",
+    ],
 )
