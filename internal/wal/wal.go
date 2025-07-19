@@ -3,9 +3,8 @@ package wal
 import (
 	"bufio"
 	"context"
-	"io/ioutil"
+	"fmt"
 	"os"
-	"simple-wal/bazel-bin/proto/protobuf_go_proto_/simple-wal/protobuf"
 	"simple-wal/protobuf"
 	"time"
 
@@ -27,7 +26,6 @@ type WriteAheadLog struct {
 	syncTimer *time.Timer
 	context   context.Context
 }
-
 
 func InitWAL(cfg WalConfig) (*WriteAheadLog, error) {
 
@@ -61,6 +59,7 @@ func WriteEntryWithCheckpoint() {
 func (walog *WriteAheadLog) WriteEntry(entry *protobuf.WalEntry) error {
 
 	data, err := proto.Marshal(entry)
+	fmt.Printf("Serialized bytes: %s\n", data)
 	walog.bufWriter.Write(data)
 
 	return err
@@ -71,10 +70,35 @@ func (walog *WriteAheadLog) FlushAndClose() {
 	walog.currFile.Close()
 }
 
-// TODO: implement
-
 func (walog *WriteAheadLog) ReadAllEntries(filename string) (*protobuf.WalEntry, error) {
-	
+	// Open file in read-only mode
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Read all data from the file
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	size := fileInfo.Size()
+	data := make([]byte, size)
+
+	_, err = file.Read(data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal into WalEntry
+	entry := &protobuf.WalEntry{}
+	if err := proto.Unmarshal(data, entry); err != nil {
+		return nil, err
+	}
+
+	return entry, nil
 }
 
 func (walog *WriteAheadLog) syncPeriodically() {

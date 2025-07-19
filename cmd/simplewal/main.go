@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"simple-wal/internal/wal"
 	"simple-wal/protobuf"
@@ -8,24 +9,7 @@ import (
 )
 
 func main() {
-	// wal, _ := wal.InitWAL(wal.CreateDefaultWalConfig("/home/arafat/Desktop/simple-wal"))
-	// fmt.Fprint(wal)
-	// if err := wal.WriteEntryWithCheckpoint([]byte("Hello World")); err != nil {
-	// 	fmt.Printf("failed to write entry: %v\n", err)
-	// 	return
-	// }
-	// if err := wal.WriteEntry([]byte("Hello World")); err != nil {
-	// 	fmt.Printf("failed to write entry: %v\n", err)
-	// 	return
-	// }
-	// time.Sleep(301 * time.Millisecond)
-
-	// entries, _ := wal.ReadAllEntries()
-	// for _, entry := range entries {
-	// 	fmt.Printf("entry: %v\n", string(entry))
-	// }
-	// wal.Close()
-
+	
 	cfg := wal.CreateDefaultWalConfig("/home/arafat/")
 	walog, err := wal.InitWAL(cfg)
 
@@ -33,18 +17,35 @@ func main() {
 		fmt.Printf("failed to init wal: %v\n", err)
 		return
 	}
+	payload := []byte("Hello Arafat")
+	
+	crc := simpleCRC32(payload)
+	isCheckpoint := true
+	
+
 	entry1 := &protobuf.WalEntry{
-		Message: "Hello WAL",
+		LogSeqNumber: 123,      // increasing log number
+		Data:         json.Marshal(payload),  // raw byte data
+		CRC:          crc,      // calculated CRC
+		IsCheckPoint: &isCheckpoint,
 	}
-	entry2 := &protobuf.WalEntry{
-		Message: "Hello WAL",
-	}
+
 	walog.WriteEntry(entry1)
-	walog.WriteEntry(entry2)
 	//walog.FlushAndClose()
 
 	time.Sleep(400 * time.Millisecond)
+	// entries, err := walog.ReadAllEntries("/home/arafat/wal.log")
 
-	walog.ReadAllEntries("/home/arafat/wal.log")
+	// for  entry := range entries {
+	// 	fmt.Println(entry)
+	// }
 
+}
+
+func simpleCRC32(data []byte) uint32 {
+	var sum uint32 = 0
+	for _, b := range data {
+		sum += uint32(b)
+	}
+	return sum
 }
